@@ -41,7 +41,7 @@ messages = [
         "role": "user",
         "content": (
             "refine this transcription: "
-            "I want you to move the marined to the left side of the building"
+            "I want you to move the United to the left side of the building"
         ),
     },
 ]

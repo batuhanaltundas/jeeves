@@ -13,7 +13,7 @@ WAKE_WORD = "jeeves"
 # Allow a small amount of text before the wake word.
 # Example:
 #
-# "hey jeeves, move the marine"
+# "hey jeeves, move the Unit"
 #
 # We can later make this stricter if desired.
 REQUIRE_WAKE_WORD = True

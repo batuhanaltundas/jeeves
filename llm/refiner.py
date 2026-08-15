@@ -40,16 +40,18 @@ Rules:
 If the transcription is already correct, return it unchanged.
 """
 
-
 class TextRefiner:
 
     def __init__(
         self,
-        model_name=QWEN_MODEL,
+        model_name=None,
     ):
 
+        if model_name is None:
+            model_name = QWEN_MODEL
+
         print(
-            f"Loading Qwen: {model_name}"
+            f"Loading model: {model_name}"
         )
 
         self.tokenizer = (
@@ -67,9 +69,9 @@ class TextRefiner:
         )
 
         self.model.eval()
-
+        
         print(
-            "Qwen loaded."
+            "Model loaded."
         )
 
     def refine(

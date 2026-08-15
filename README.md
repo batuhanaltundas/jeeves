@@ -6,6 +6,8 @@ The purpose of Jeeves is to provide a clean speech interface for another local A
 
 The important architectural principle is that each component has a single responsibility. Whisper performs speech recognition; it does not decide what the user wants. Qwen performs linguistic cleanup; it does not execute commands or answer questions. The downstream agent receives the resulting text and is responsible for reasoning and taking action.
 
+The purpose of this codebase is to provide a proof of concept. The current setup of Whisper with `small` setting is to reduce the workload, leading to less than optimal capabilities in speech-to-text translation. Similarly, the use of the `Qwen2.5-1.5B-Instruct1` is meant to be used as the proof of concept of the validity of this pipeline.
+
 ---
 
 ## Architecture
@@ -85,19 +87,19 @@ For example:
 
 ```text
 User:
-    "Jeeves, move the second Marine behind the building."
+    "Jeeves, move the second Unit behind the building."
 
 Whisper:
-    "Jeeves, move the second Marine behind the building."
+    "Jeeves, move the second Unit behind the building."
 
 Wake-word router:
     Jeeves detected
 
 Command:
-    "Move the second Marine behind the building."
+    "Move the second Unit behind the building."
 
 Qwen:
-    "Move the second Marine behind the building."
+    "Move the second Unit behind the building."
 
 Agent:
     receives refined command
@@ -400,19 +402,19 @@ For example:
 ```text
 Whisper:
 
-"jeeves move the marine uh to the left side of the building"
+"jeeves move the Unit uh to the left side of the building"
 ```
 
 Qwen should produce approximately:
 
 ```text
-Move the Marine to the left side of the building.
+Move the Unit to the left side of the building.
 ```
 
 It should not produce:
 
 ```text
-The Marine has been moved to the left side of the building.
+The Unit has been moved to the left side of the building.
 ```
 
 The latter would be an action or interpretation rather than transcription refinement.
@@ -457,13 +459,13 @@ For example:
 
 ```text
 Audio:
-    "Move Marine 2 to B17."
+    "Move Unit 2 to B17."
 
 Whisper:
-    "Move Marine 2 to B17."
+    "Move Unit 2 to B17."
 
 Qwen:
-    "Move Marine 2 to B17."
+    "Move Unit 2 to B17."
 
 Agent:
     incorrect action
@@ -584,7 +586,7 @@ Speak naturally.
 For example:
 
 ```text
-Jeeves, move the second Marine behind the building.
+Jeeves, move the second Unit behind the building.
 ```
 
 The expected processing sequence is:
@@ -597,15 +599,15 @@ The expected processing sequence is:
 Transcribing...
 
 WHISPER:
-Jeeves, move the second Marine behind the building.
+Jeeves, move the second Unit behind the building.
 
 COMMAND:
-Move the second Marine behind the building.
+Move the second Unit behind the building.
 
 Refining...
 
 REFINED:
-Move the second Marine behind the building.
+Move the second Unit behind the building.
 
 DOWNSTREAM AGENT
 ```
@@ -1038,6 +1040,53 @@ Ctrl+C
 ```
 
 The microphone stream will be stopped and the application will exit.
+
+---
+
+## Refiner Evaluation
+
+The language-model refiner was evaluated on a Windows 11 system using
+CPU-only inference. The benchmark measures refinement latency across
+increasing transcript lengths to characterize the computational cost
+introduced by the local LLM stage of the Jeeves pipeline.
+
+**Benchmark hardware:**
+
+- **OS:** Windows 11
+- **CPU:** Intel Core i7-7700 @ 3.60 GHz
+- **CPU:** 4 physical cores / 8 logical processors
+- **RAM:** 32 GB
+- **GPU:** None
+- **Inference:** CPU only
+
+The benchmark evaluates Qwen2.5-0.5B-Instruct, Qwen2.5-1.5B-Instruct,
+and SmolLM2-1.7B-Instruct using transcripts ranging from 5 to 120
+words. Each model is evaluated sequentially after a warm-up phase, with
+multiple repetitions for each transcript length. Whisper is not included
+in this experiment; the benchmark isolates the additional computational
+cost of the language-model refinement stage.
+
+### Refinement Latency
+
+![Local LLM refinement latency versus transcript length](evaluation/results/model_latency.png)
+
+The figure shows refinement latency as a function of transcript length
+for the evaluated local language models. Error bars represent the
+standard deviation across repeated measurements. This experiment is
+intended to characterize the latency-quality tradeoff involved in
+adding local language-model refinement to an interactive speech
+pipeline rather than provide a general benchmark of language-model
+performance.
+
+---
+## Development Note
+
+This project was developed as a rapid prototype over approximately
+three hours. ChatGPT was used as an AI programming assistant for
+implementation support, debugging, documentation, and exploration of
+alternative model configurations. The system architecture,
+experimental design, model selection, and evaluation methodology were
+reviewed and validated by the author.
 
 ---
 
